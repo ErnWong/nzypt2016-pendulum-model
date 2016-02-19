@@ -142,9 +142,47 @@ State rk4(State &state, Param &param, double step, double time)
 
 // }}}
 
-double bobRadius = 0.1503;
-double pivotRadius = 0;//0.45;
-double pivotRadPerSecInitial = 7.0;
+// Test cases for convenience
+int testNumber = 0;
+double testAngle[] =
+{
+    1.5,
+    1.2,
+    1.0,
+    0.5,
+    -0.5,
+    -0.6,
+    -0.8,
+    -1.0,
+    -1.2,
+    -1.4,
+    -1.5,
+    -2.7,
+    -2.9,
+    -3.0
+};
+
+double testRadPerSec[] =
+{
+    9.77591445809,
+    4.27289896361,
+    3.43948436183,
+    2.40128546859,
+    13.4954970057,
+    7.65126437832,
+    6.14655625872,
+    6.24720671618,
+    7.23505204194,
+    10.3064690187,
+    15.8955607605,
+    14.3183359035,
+    3.38668751069,
+    2.12773706908
+};
+
+double bobRadius = 0.15;
+double pivotRadius = 0.45;
+double pivotRadPerSecInitial = testRadPerSec[testNumber];
 double pivotRadPerSecChange = 0.0;
 
 // Pivot Motion {{{
@@ -324,8 +362,8 @@ int main(int argc, char ** argv)
     param.mass = 1.0;
     param.g = 9.81;
     param.length = 1.0;
-    param.damp1 = 0.1;
-    param.damp2 = 0.1;
+    param.damp1 = 0.0;
+    param.damp2 = 0.0;
     param.accelx = accelPivotX;
     param.accely = accelPivotY;
     param.accelz = accelPivotZ;
@@ -333,8 +371,8 @@ int main(int argc, char ** argv)
     double expectedAngle1 = -asin((pivotRadius + bobRadius) / param.length);
 
     State initial;
-    initial.angle1 = -0.9;// expectedAngle1;//-45 / 180.0 * 3.141592653;
-    initial.angle2 = 0.0;
+    initial.angle1 = testAngle[testNumber];//-0.65;//expectedAngle1;//-45 / 180.0 * 3.141592653;
+    initial.angle2 = 0.0;//0.005;
     initial.dangle1 = 0.0;
     initial.dangle2 = pivotRadPerSec(0); //5.0;
 
