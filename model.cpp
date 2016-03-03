@@ -1,5 +1,6 @@
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 
 enum StreamMode
@@ -143,7 +144,7 @@ State rk4(State &state, Param &param, double step, double time)
 // }}}
 
 // Test cases for convenience
-int testNumber = 0;
+int testNumber = 8;
 double testAngle[] =
 {
     1.5,
@@ -179,6 +180,11 @@ double testRadPerSec[] =
     3.38668751069,
     2.12773706908
 };
+double getAngVel(double angle1)
+{
+    angle1 *= -1;
+    return sqrt(9.81 * tan(angle1) / (sin(angle1) - 0.45));
+}
 
 double bobRadius = 0.15;
 double pivotRadius = 0.45;
@@ -347,17 +353,6 @@ void testSingleCase(State initial, Param param, double step)
 
 int main(int argc, char ** argv)
 {
-    void (*testRoutine)(State, Param, double step) = testSingleCase;
-    for (int i = 1; i < argc; i++)
-    {
-        if (strcmp(argv[i], "sp") == 0) streamMode = STREAM_POSITIONS;
-        else if (strcmp(argv[i], "sa") == 0) streamMode = STREAM_ANGLES;
-        else if (strcmp(argv[i], "sn") == 0) streamMode = STREAM_NONE;
-        else if (strcmp(argv[i], "pr") == 0) printResult = true;
-        else if (strcmp(argv[i], "npr") == 0) printResult = false;
-        else if (strcmp(argv[i], "tsc") == 0) testRoutine = testSingleCase;
-        else if (strcmp(argv[i], "tangvel") == 0) testRoutine = testAngVelVSSteadyAngle;
-    }
     Param param;
     param.mass = 1.0;
     param.g = 9.81;
@@ -368,8 +363,6 @@ int main(int argc, char ** argv)
     param.accely = accelPivotY;
     param.accelz = accelPivotZ;
 
-    double expectedAngle1 = -asin((pivotRadius + bobRadius) / param.length);
-
     State initial;
     initial.angle1 = testAngle[testNumber];//-0.65;//expectedAngle1;//-45 / 180.0 * 3.141592653;
     initial.angle2 = 0.0;//0.005;
@@ -377,6 +370,54 @@ int main(int argc, char ** argv)
     initial.dangle2 = pivotRadPerSec(0); //5.0;
 
     double step = 0.00002;
+    void (*testRoutine)(State, Param, double step) = testSingleCase;
+    for (int i = 1; i < argc; i++)
+    {
+        if (strcmp(argv[i], "sp") == 0) streamMode = STREAM_POSITIONS;
+        else if (strcmp(argv[i], "sa") == 0) streamMode = STREAM_ANGLES;
+        else if (strcmp(argv[i], "sn") == 0) streamMode = STREAM_NONE;
+        else if (strcmp(argv[i], "pr") == 0) printResult = true;
+        else if (strcmp(argv[i], "npr") == 0) printResult = false;
+        else if (strcmp(argv[i], "tsc") == 0) testRoutine = testSingleCase;
+        else if (strcmp(argv[i], "tangvel") == 0) testRoutine = testAngVelVSSteadyAngle;
+        else if (strcmp(argv[i], "-damp2") == 0 && i + 1 < argc)
+        {
+            i++;
+            param.damp2 = atof(argv[i]);
+        }
+        else if (strcmp(argv[i], "-damp1") == 0 && i + 1 < argc)
+        {
+            i++;
+            param.damp1 = atof(argv[i]);
+        }
+        else if (strcmp(argv[i], "-testnum") == 0 && i + 1 < argc)
+        {
+            i++;
+            testNumber = atoi(argv[i]);
+            pivotRadPerSecInitial = testRadPerSec[testNumber];
+            initial.angle1 = testAngle[testNumber];
+        }
+        else if (strcmp(argv[i], "-step") == 0 && i + 1 < argc)
+        {
+            i++;
+            step = atof(argv[i]);
+        }
+        else if (strcmp(argv[i], "-angle1") == 0 && i + 1 < argc)
+        {
+            i++;
+            initial.angle1 = atof(argv[i]);
+            pivotRadPerSecInitial = getAngVel(initial.angle1);
+            initial.dangle2 = pivotRadPerSecInitial;
+        }
+        else if (strcmp(argv[i], "-angvel") == 0 && i + 1 < argc)
+        {
+            i++;
+            pivotRadPerSecInitial = atof(argv[i]);
+            initial.dangle2 = pivotRadPerSecInitial;
+        }
+    }
+
+    double expectedAngle1 = -asin((pivotRadius + bobRadius) / param.length);
 
     testRoutine(initial, param, step);
 }
