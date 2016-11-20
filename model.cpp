@@ -187,7 +187,7 @@ double getAngVel(double angle1)
 }
 
 double bobRadius = 0.15;
-double pivotRadius = 0.45;
+double pivotRadius = 0.065;
 double pivotRadPerSecInitial = testRadPerSec[testNumber];
 double pivotRadPerSecChange = 0.0;
 
@@ -356,7 +356,7 @@ int main(int argc, char ** argv)
     Param param;
     param.mass = 1.0;
     param.g = 9.81;
-    param.length = 1.0;
+    param.length = 0.42;
     param.damp1 = 0.0;
     param.damp2 = 0.0;
     param.accelx = accelPivotX;
